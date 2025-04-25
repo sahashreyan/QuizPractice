@@ -1,0 +1,114 @@
+{% extends "base.html" %}
+
+{% block title %}Test Results{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0">Test Results: {{ test.title }}</h4>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h5>Score</h5>
+                        <h2>{{ result.score }} / {{ result.total_possible }}</h2>
+                        <p>
+                            Percentage: {{ (result.score / result.total_possible * 100)|round(2) }}%
+                        </p>
+                    </div>
+                    <div class="col-md-6">
+                        <h5>Details</h5>
+                        <p>Date: {{ result.end_time.strftime('%Y-%m-%d %H:%M') }}</p>
+                        <p>Duration: {{ (result.end_time - result.start_time).seconds // 60 }} minutes</p>
+                        {% if test.has_negative_marking %}
+                        <p>Negative Marking: {{ test.negative_marks }} mark per wrong answer</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <h4 class="mb-3">Question Review</h4>
+        
+        {% for answer in answers %}
+        <div class="card mb-3">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Question {{ loop.index }}</h5>
+                <span>
+                    {% if answer.is_correct %}
+                        <span class="badge bg-success">Correct (+{{ answer.question.marks }})</span>
+                    {% elif answer.selected_option %}
+                        <span class="badge bg-danger">Incorrect ({% if test.has_negative_marking %}-{{ test.negative_marks }}{% else %}0{% endif %})</span>
+                    {% else %}
+                        <span class="badge bg-secondary">Not Attempted (0)</span>
+                    {% endif %}
+                </span>
+            </div>
+            <div class="card-body">
+                <div class="question-text mb-3">{{ answer.question.question_text|safe }}</div>
+                
+                <div class="options">
+                    <div class="mb-2 d-flex">
+                        <div class="option-indicator me-2">
+                            {% if answer.question.correct_option == 'A' %}
+                                <span class="text-success">✓</span>
+                            {% elif answer.selected_option == 'A' %}
+                                <span class="text-danger">✗</span>
+                            {% endif %}
+                        </div>
+                        <div class="option-text {% if answer.question.correct_option == 'A' %}text-success fw-bold{% elif answer.selected_option == 'A' %}text-danger{% endif %}">
+                            A. {{ answer.question.option_a|safe }}
+                        </div>
+                    </div>
+                    
+                    <div class="mb-2 d-flex">
+                        <div class="option-indicator me-2">
+                            {% if answer.question.correct_option == 'B' %}
+                                <span class="text-success">✓</span>
+                            {% elif answer.selected_option == 'B' %}
+                                <span class="text-danger">✗</span>
+                            {% endif %}
+                        </div>
+                        <div class="option-text {% if answer.question.correct_option == 'B' %}text-success fw-bold{% elif answer.selected_option == 'B' %}text-danger{% endif %}">
+                            B. {{ answer.question.option_b|safe }}
+                        </div>
+                    </div>
+                    
+                    <div class="mb-2 d-flex">
+                        <div class="option-indicator me-2">
+                            {% if answer.question.correct_option == 'C' %}
+                                <span class="text-success">✓</span>
+                            {% elif answer.selected_option == 'C' %}
+                                <span class="text-danger">✗</span>
+                            {% endif %}
+                        </div>
+                        <div class="option-text {% if answer.question.correct_option == 'C' %}text-success fw-bold{% elif answer.selected_option == 'C' %}text-danger{% endif %}">
+                            C. {{ answer.question.option_c|safe }}
+                        </div>
+                    </div>
+                    
+                    <div class="mb-2 d-flex">
+                        <div class="option-indicator me-2">
+                            {% if answer.question.correct_option == 'D' %}
+                                <span class="text-success">✓</span>
+                            {% elif answer.selected_option == 'D' %}
+                                <span class="text-danger">✗</span>
+                            {% endif %}
+                        </div>
+                        <div class="option-text {% if answer.question.correct_option == 'D' %}text-success fw-bold{% elif answer.selected_option == 'D' %}text-danger{% endif %}">
+                            D. {{ answer.question.option_d|safe }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+        
+        <div class="text-center mb-5 mt-4">
+            <a href="{{ url_for('student_dashboard') }}" class="btn btn-primary">Back to Dashboard</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

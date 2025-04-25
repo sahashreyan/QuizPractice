@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+
+{% block title %}Practice Test Platform{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8 text-center">
+        <h1 class="display-4 mb-4">Welcome to Practice Test Platform</h1>
+        <p class="lead">An online platform for students to take practice tests and track their progress.</p>
+        
+        {% if current_user.is_authenticated %}
+            {% if current_user.is_admin %}
+                <div class="mt-5">
+                    <h3>Admin Dashboard</h3>
+                    <p>Manage tests, users, and view student results.</p>
+                    <a href="{{ url_for('admin_dashboard') }}" class="btn btn-primary btn-lg">Go to Dashboard</a>
+                </div>
+            {% else %}
+                <div class="mt-5">
+                    <h3>Student Dashboard</h3>
+                    <p>Take tests and view your results.</p>
+                    <a href="{{ url_for('student_dashboard') }}" class="btn btn-primary btn-lg">Go to Dashboard</a>
+                </div>
+            {% endif %}
+        {% else %}
+            <div class="mt-5">
+                <p>Please log in to access the platform.</p>
+                <a href="{{ url_for('login') }}" class="btn btn-primary btn-lg">Login</a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<div class="row mt-5">
+    <div class="col-md-4">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                <h3>For Students</h3>
+                <p>Take practice tests, review your answers, and track your progress over time.</p>
+                <p><i class="bi bi-check-circle-fill text-success"></i> Timed tests</p>
+                <p><i class="bi bi-check-circle-fill text-success"></i> Instant results</p>
+                <p><i class="bi bi-check-circle-fill text-success"></i> Performance tracking</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                <h3>For Admins</h3>
+                <p>Create and manage tests, add users, and view detailed student results.</p>
+                <p><i class="bi bi-check-circle-fill text-success"></i> Easy test creation</p>
+                <p><i class="bi bi-check-circle-fill text-success"></i> User management</p>
+                <p><i class="bi bi-check-circle-fill text-success"></i> Result analytics</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                <h3>Features</h3>
+                <p>Our platform offers a range of features to enhance the testing experience.</p>
+                <p><i class="bi bi-check-circle-fill text-success"></i> LaTeX support</p>
+                <p><i class="bi bi-check-circle-fill text-success"></i> Negative marking</p>
+                <p><i class="bi bi-check-circle-fill text-success"></i> Detailed analytics</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

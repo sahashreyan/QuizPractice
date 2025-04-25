@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+
+{% block title %}{{ test.title }}{% endblock %}
+
+{% block extra_head %}
+<style>
+    .question-card {
+        margin-bottom: 1.5rem;
+    }
+    .timer-container {
+        position: sticky;
+        top: 20px;
+        z-index: 100;
+    }
+    .timer {
+        font-size: 1.5rem;
+        font-weight: bold;
+    }
+    .timer.warning {
+        color: #dc3545;
+    }
+    .option-label {
+        display: block;
+        padding: 0.5rem;
+        margin-bottom: 0.5rem;
+        border: 1px solid #dee2e6;
+        border-radius: 0.25rem;
+        cursor: pointer;
+    }
+    .option-label:hover {
+        background-color: #f8f9fa;
+    }
+    input[type="radio"]:checked + .option-label {
+        background-color: #d1e7dd;
+        border-color: #198754;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-8">
+        <h3>{{ test.title }}</h3>
+        <p>{{ test.description }}</p>
+    </div>
+    <div class="col-md-4">
+        <div class="card timer-container">
+            <div class="card-body text-center">
+                <div id="timer" class="timer" data-duration="{{ test.duration_minutes }}">
+                    {{ test.duration_minutes }}:00
+                </div>
+                <p class="mb-0 mt-2">Time Remaining</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<form id="test-form" method="POST" action="{{ url_for('submit_test', test_id=test.id) }}">
+    <input type="hidden" name="result_id" value="{{ result.id }}">
+    
+    {% for question in questions %}
+    <div class="card question-card">
+        <div class="card-header">
+            <div class="d-flex justify-content-between">
+                <h5>Question {{ loop.index }}</h5>
+                <span>{{ question.marks }} mark{% if question.marks > 1 %}s{% endif %}</span>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="question-text mb-4">{{ question.question_text|safe }}</div>
+            
+            <div class="options">
+                <div class="mb-2">
+                    <input type="radio" class="d-none" id="q{{ question.id }}-A" name="answers[{{ question.id }}]" value="A">
+                    <label for="q{{ question.id }}-A" class="option-label">
+                        A. {{ question.option_a|safe }}
+                    </label>
+                </div>
+                
+                <div class="mb-2">
+                    <input type="radio" class="d-none" id="q{{ question.id }}-B" name="answers[{{ question.id }}]" value="B">
+                    <label for="q{{ question.id }}-B" class="option-label">
+                        B. {{ question.option_b|safe }}
+                    </label>
+                </div>
+                
+                <div class="mb-2">
+                    <input type="radio" class="d-none" id="q{{ question.id }}-C" name="answers[{{ question.id }}]" value="C">
+                    <label for="q{{ question.id }}-C" class="option-label">
+                        C. {{ question.option_c|safe }}
+                    </label>
+                </div>
+                
+                <div class="mb-2">
+                    <input type="radio" class="d-none" id="q{{ question.id }}-D" name="answers[{{ question.id }}]" value="D">
+                    <label for="q{{ question.id }}-D" class="option-label">
+                        D. {{ question.option_d|safe }}
+                    </label>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+
+    <div class="text-center mb-5 mt-4">
+        <button type="submit" class="btn btn-primary btn-lg">Submit Test</button>
+    </div>
+</form>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/test.js') }}"></script>
+{% endblock %}

@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard{% endblock %}
+
+{% block content %}
+<h3>Admin Dashboard</h3>
+
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5>Tests</h5>
+                <a href="{{ url_for('create_test') }}" class="btn btn-sm btn-primary">Create New Test</a>
+            </div>
+            <div class="card-body">
+                {% if tests %}
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Title</th>
+                                <th>Duration</th>
+                                <th>Created</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for test in tests %}
+                                <tr>
+                                    <td>{{ test.title }}</td>
+                                    <td>{{ test.duration_minutes }} minutes</td>
+                                    <td>{{ test.created_at.strftime('%Y-%m-%d') }}</td>
+                                    <td>
+                                        <a href="#" class="btn btn-sm btn-info">Edit</a>
+                                        <form method="POST" action="{{ url_for('delete_test', test_id=test.id) }}" class="d-inline">
+                                            <button type="submit" class="btn btn-sm btn-danger confirm-delete">Delete</button>
+                                        </form>
+                                        <a href="{{ url_for('admin_view_results', test_id=test.id) }}" class="btn btn-sm btn-secondary">View Results</a>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                {% else %}
+                    <p>No tests available. Create your first test!</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

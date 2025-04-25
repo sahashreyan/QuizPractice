@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+
+{% block title %}Student Dashboard{% endblock %}
+
+{% block content %}
+<h3>Student Dashboard</h3>
+
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <h5>Available Tests</h5>
+            </div>
+            <div class="card-body">
+                {% if available_tests %}
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Title</th>
+                                <th>Duration</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for test in available_tests %}
+                                <tr>
+                                    <td>{{ test.title }}</td>
+                                    <td>{{ test.duration_minutes }} minutes</td>
+                                    <td>
+                                        <a href="{{ url_for('take_test', test_id=test.id) }}" class="btn btn-sm btn-primary">Start Test</a>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                {% else %}
+                    <p>No tests available at the moment.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <h5>Completed Tests</h5>
+            </div>
+            <div class="card-body">
+                {% if completed_tests %}
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Test</th>
+                                <th>Date</th>
+                                <th>Score</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for result in completed_tests %}
+                                <tr>
+                                    <td>{{ result.test.title }}</td>
+                                    <td>{{ result.end_time.strftime('%Y-%m-%d %H:%M') }}</td>
+                                    <td>{{ result.score }} / {{ result.total_possible }}</td>
+                                    <td>
+                                        <a href="{{ url_for('view_test_result', result_id=result.id) }}" class="btn btn-sm btn-info">View Details</a>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                {% else %}
+                    <p>You haven't completed any tests yet.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

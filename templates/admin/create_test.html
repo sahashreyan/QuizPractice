@@ -1,0 +1,234 @@
+{% extends "base.html" %}
+
+{% block title %}Create Test{% endblock %}
+
+{% block extra_head %}
+<style>
+    .question-container {
+        border: 1px solid #dee2e6;
+        border-radius: 0.25rem;
+        padding: 1rem;
+        margin-bottom: 1rem;
+        background-color: #f8f9fa;
+    }
+    #preview-area {
+        border: 1px solid #dee2e6;
+        border-radius: 0.25rem;
+        padding: 1rem;
+        margin-top: 1rem;
+        background-color: white;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<h3>Create New Test</h3>
+
+<form id="test-form" method="POST">
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Test Information</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label for="title" class="form-label">Test Title</label>
+                        <input type="text" class="form-control" id="title" name="title" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="description" class="form-label">Description</label>
+                        <textarea class="form-control" id="description" name="description" rows="3"></textarea>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="duration" class="form-label">Duration (minutes)</label>
+                                <input type="number" class="form-control" id="duration" name="duration" min="1" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3 form-check mt-4">
+                                <input type="checkbox" class="form-check-input" id="negative-marking" name="negative_marking">
+                                <label class="form-check-label" for="negative-marking">Enable Negative Marking</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="negative-marks-container" class="mb-3" style="display: none;">
+                        <label for="negative-marks" class="form-label">Negative Marks (per wrong answer)</label>
+                        <input type="number" class="form-control" id="negative-marks" name="negative_marks" value="0.25" min="0" step="0.25">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5>Questions</h5>
+                    <button type="button" id="add-question" class="btn btn-primary btn-sm">Add Question</button>
+                </div>
+                <div class="card-body">
+                    <div id="questions-container">
+                        <!-- Questions will be added here -->
+                        <div class="alert alert-info">
+                            Click "Add Question" to start creating your test. Use LaTeX for mathematical formulas: $x^2 + y^2 = z^2$
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5>LaTeX Preview</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label for="latex-input" class="form-label">Test your LaTeX here</label>
+                        <input type="text" class="form-control" id="latex-input" placeholder="Enter LaTeX: e.g., $\sqrt{x^2 + y^2}$">
+                    </div>
+                    <div id="preview-area">
+                        LaTeX will render here
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="text-center mb-4">
+        <button type="submit" class="btn btn-success">Create Test</button>
+        <a href="{{ url_for('admin_dashboard') }}" class="btn btn-secondary">Cancel</a>
+    </div>
+</form>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/latex.js') }}"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    let questionCounter = 0;
+    
+    // Handle negative marking toggle
+    document.getElementById('negative-marking').addEventListener('change', function() {
+        document.getElementById('negative-marks-container').style.display = 
+            this.checked ? 'block' : 'none';
+    });
+    
+    // Add new question
+    document.getElementById('add-question').addEventListener('click', function() {
+        questionCounter++;
+        const questionHtml = `
+            <div class="question-container" id="question-${questionCounter}">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h6>Question ${questionCounter}</h6>
+                    <button type="button" class="btn btn-danger btn-sm remove-question" data-id="${questionCounter}">Remove</button>
+                </div>
+                <div class="mb-3">
+                    <label for="q${questionCounter}-text" class="form-label">Question Text</label>
+                    <textarea class="form-control question-text" id="q${questionCounter}-text" name="questions[${questionCounter}][text]" rows="3" required></textarea>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label for="q${questionCounter}-option-a" class="form-label">Option A</label>
+                        <input type="text" class="form-control" id="q${questionCounter}-option-a" name="questions[${questionCounter}][option_a]" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="q${questionCounter}-option-b" class="form-label">Option B</label>
+                        <input type="text" class="form-control" id="q${questionCounter}-option-b" name="questions[${questionCounter}][option_b]" required>
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label for="q${questionCounter}-option-c" class="form-label">Option C</label>
+                        <input type="text" class="form-control" id="q${questionCounter}-option-c" name="questions[${questionCounter}][option_c]" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="q${questionCounter}-option-d" class="form-label">Option D</label>
+                        <input type="text" class="form-control" id="q${questionCounter}-option-d" name="questions[${questionCounter}][option_d]" required>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="q${questionCounter}-correct" class="form-label">Correct Option</label>
+                            <select class="form-control" id="q${questionCounter}-correct" name="questions[${questionCounter}][correct]" required>
+                                <option value="A">A</option>
+                                <option value="B">B</option>
+                                <option value="C">C</option>
+                                <option value="D">D</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="q${questionCounter}-marks" class="form-label">Marks</label>
+                            <input type="number" class="form-control" id="q${questionCounter}-marks" name="questions[${questionCounter}][marks]" value="1" min="1" step="1" required>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        const container = document.getElementById('questions-container');
+        
+        // Remove the info alert if it's the first question
+        if (questionCounter === 1) {
+            container.innerHTML = '';
+        }
+        
+        // Add the new question to the container
+        container.insertAdjacentHTML('beforeend', questionHtml);
+        
+        // Initialize removal event for the new question
+        document.querySelector(`#question-${questionCounter} .remove-question`).addEventListener('click', function() {
+            const questionId = this.getAttribute('data-id');
+            document.getElementById(`question-${questionId}`).remove();
+            
+            // Show info alert if no questions left
+            if (document.querySelectorAll('.question-container').length === 0) {
+                container.innerHTML = `
+                    <div class="alert alert-info">
+                        Click "Add Question" to start creating your test. Use LaTeX for mathematical formulas: $x^2 + y^2 = z^2$
+                    </div>
+                `;
+            }
+        });
+        
+        // Re-render MathJax for the new elements
+        if (window.MathJax) {
+            MathJax.typeset();
+        }
+    });
+    
+    // LaTeX preview functionality
+    document.getElementById('latex-input').addEventListener('input', function() {
+        const previewArea = document.getElementById('preview-area');
+        previewArea.textContent = this.value;
+        
+        if (window.MathJax) {
+            MathJax.typeset([previewArea]);
+        }
+    });
+    
+    // Form submission
+    document.getElementById('test-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        // Validation: Ensure at least one question is added
+        if (document.querySelectorAll('.question-container').length === 0) {
+            alert('Please add at least one question to the test.');
+            return;
+        }
+        
+        // Submit the form
+        this.submit();
+    });
+});
+</script>
+{% endblock %}
